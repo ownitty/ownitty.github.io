@@ -96,6 +96,7 @@
                         style="object-fit: cover;">
                 </div>
             
+                <form class="requires-validation" id="signupForm" novalidate>
                 <div class="card-body">
                     <!--<h5 class="card-title">Join</h5>-->
                     <p class="card-text text-center">Je rejoins la communauté des propriétaires bailleurs.</p>
@@ -103,7 +104,8 @@
                         
                         <div class="input-group px-0">
                             <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope"></i></span>
-                            <input type="email" name="email" class="form-control border-start-0 rounded-end" placeholder="Votre adresse email">
+                            <input type="email" name="email" class="form-control rounded-end" placeholder="Votre adresse email" required>
+                            <div class="invalid-tooltip">Email invalide!</div>
                         </div>
                         <div class="text-center">
                             <small class="form-text text-muted text-center" style="font-size: 10px;"><i class="bi bi-info-circle pe-2"></i>Promis, on s'en servira seulement pour vous tenir au courant de l'avancement d'Ownitty.</small>
@@ -112,17 +114,16 @@
                 </div>
 
                 <div class="card-footer bg-white border-0 px-0 pt-0">
-                    <a 
+                    <button 
                         id="submit"
                         class="btn rounded-3 w-100" 
                         style="background-color: #DC3545;"
-                        type="submit" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#staticBackdrop">
+                        type="submit">
                         <div class="text-white" style="font-weight: bold;">Je m'inscris</div>
                         <div class="text-white" style="font-weight: bold;">et je gagne 500 KeyPoints</div>
-                    </a>
+                    </button>
                 </div>
+                </form>
 
             </div>
             
@@ -388,11 +389,11 @@
         </div>
 
     </div>
-</footer><div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+</footer><div class="modal fade" id="signupConfirmation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">Merci !</h5>
+                <h5 class="modal-title" id="signupConfirmationLabel">Merci !</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -432,8 +433,8 @@
 
   /* https://dev.to/kromate/connecting-your-html-forms-to-a-google-spreadsheet-p9h */
 
-  const form = document.querySelector("#form")
-  const submitButton = document.querySelector("#submit")
+  const form = document.getElementById("signupForm")
+  const submitButton = document.getElementById("submit")
   const scriptURL = 'https://script.google.com/macros/s/AKfycbzS2kWWGeBrORTnRyhivDImKHwIgIDuiFOb1lLJ2jeUArKc8xPMDsW8xQp1jhmr0bkL/exec'
 
   form.addEventListener('submit', e => {
@@ -450,7 +451,28 @@
         submitButton.disabled = false;
       })
   })
-</script></div>
+</script>
+<script>
+    (function () {
+      'use strict'
+      const forms = document.querySelectorAll('.requires-validation')
+      Array.from(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+
+            form.classList.add('was-validated');
+
+            let signupConfirmation = new bootstrap.Modal(document.getElementById('signupConfirmation'), {});
+            signupConfirmation.show();
+
+          }, false)
+        })
+    })()
+  </script></div>
 </main>
     </body>
 </html>
