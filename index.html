@@ -96,20 +96,21 @@
                         style="object-fit: cover;">
                 </div>
             
-                <form class="requires-validation" id="signupForm" novalidate>
                 <div class="card-body">
                     <!--<h5 class="card-title">Join</h5>-->
                     <p class="card-text text-center">Je rejoins la communauté des propriétaires bailleurs.</p>
                     <div class="d-flex flex-column">
                         
-                        <div class="input-group px-0">
-                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope"></i></span>
-                            <input type="email" name="email" class="form-control rounded-end" placeholder="Votre adresse email" required>
-                            <div class="invalid-tooltip">Email invalide!</div>
-                        </div>
-                        <div class="text-center">
-                            <small class="form-text text-muted text-center" style="font-size: 10px;"><i class="bi bi-info-circle pe-2"></i>Promis, on s'en servira seulement pour vous tenir au courant de l'avancement d'Ownitty.</small>
-                        </div>
+                        <form id="signupForm" novalidate>
+                            <div class="input-group px-0">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope"></i></span>
+                                <input id="email" name="email" type="email" class="form-control rounded-end" placeholder="Votre adresse email">
+                                <div class="invalid-tooltip">Email invalide!</div>
+                            </div>
+                            <div class="text-center">
+                                <small class="form-text text-muted text-center" style="font-size: 10px;"><i class="bi bi-info-circle pe-2"></i>Promis, on s'en servira seulement pour vous tenir au courant de l'avancement d'Ownitty.</small>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -118,12 +119,11 @@
                         id="submit"
                         class="btn rounded-3 w-100" 
                         style="background-color: #DC3545;"
-                        type="submit">
+                        onClick="submitEmail()">
                         <div class="text-white" style="font-weight: bold;">Je m'inscris</div>
                         <div class="text-white" style="font-weight: bold;">et je gagne 500 KeyPoints</div>
                     </button>
                 </div>
-                </form>
 
             </div>
             
@@ -389,7 +389,9 @@
         </div>
 
     </div>
-</footer><div class="modal fade" id="signupConfirmation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+</footer>
+
+<div class="modal fade" id="signupConfirmation" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -414,8 +416,27 @@
             </div>
         </div>
     </div>
-</div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</div><div class="modal fade" id="signupError" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signupErrorLabel">Erreur !</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="pb-3">
+                    <p>Une erreur est survenue. Veuillez nous contacter directement par email à l'adresse suivante : <a href="mailto:ownitty.app@gmail.com" target="_blank">ownitty.app@gmail.com</a></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <!-- <script src="js/scripts.js"></script> -->
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -437,42 +458,81 @@
   const submitButton = document.getElementById("submit")
   const scriptURL = 'https://script.google.com/macros/s/AKfycbzS2kWWGeBrORTnRyhivDImKHwIgIDuiFOb1lLJ2jeUArKc8xPMDsW8xQp1jhmr0bkL/exec'
 
-  form.addEventListener('submit', e => {
-    submitButton.disabled = true;
-    e.preventDefault();
+  function sendToGDrive(email) {
+
+    // submitButton.disabled = true;
+    submitButton.setAttribute("disabled", null);
+
     let requestBody = new FormData(form);
     fetch(scriptURL, { method: 'POST', body: requestBody })
       .then(response => {
-        // alert('Success!', response)
-        submitButton.disabled = false;
+        
+        // console.log('Success!', response);
+        
+        //submitButton.disabled = false;
+        submitButton.removeAttribute("disabled");
+
+        // Show the confirmation modal
+        let modalElt = document.getElementById('signupConfirmation');
+        let modal = new bootstrap.Modal(modalElt, { 
+            backdrop: true, 
+            keyboard: true, 
+            focus: true, 
+        });
+        modal.show();
       })
       .catch(error => {
-        // alert('Error!', error.message)
-        submitButton.disabled = false;
+        
+        // console.log('Error!', error.message);
+        
+        // submitButton.disabled = false;
+        submitButton.removeAttribute("disabled");
+
+        // Show the error modal
+        let modalElt = document.getElementById('signupError');
+        let modal = new bootstrap.Modal(modalElt, { 
+            backdrop: true, 
+            keyboard: true, 
+            focus: true, 
+        });
+        modal.show();
       })
-  })
+  }
+
 </script>
 <script>
-    (function () {
-      'use strict'
-      const forms = document.querySelectorAll('.requires-validation')
-      Array.from(forms)
-        .forEach(function (form) {
-          form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-              event.preventDefault();
-              event.stopPropagation();
-            }
+    const validateEmail = (email) => {
+        let ret = String(email)
+            .toLowerCase()
+            .match(
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            );
 
-            form.classList.add('was-validated');
+        return ret?true:false;
+    };
 
-            let signupConfirmation = new bootstrap.Modal(document.getElementById('signupConfirmation'), {});
-            signupConfirmation.show();
+    function submitEmail() {
+        const emailElt = document.getElementById("email")
+        const email = emailElt.value;
 
-          }, false)
-        })
-    })()
-  </script></div>
+        const is_valid = validateEmail(email);
+        if(is_valid) {
+
+            // Set the email inputbox style
+            emailElt.classList.add("is-valid");
+            emailElt.classList.remove("is-invalid");
+
+            // Send the email to gDrive
+            sendToGDrive(email);
+        }
+        else {
+            emailElt.classList.add("is-invalid");
+            emailElt.classList.remove("is-valid");
+
+        }
+
+    }
+</script></div>
 </main>
     </body>
 </html>
