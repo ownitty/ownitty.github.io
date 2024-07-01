@@ -117,6 +117,7 @@
                                 <input id="email" name="email" type="email" class="form-control rounded-end" placeholder="Votre adresse email">
                                 <div class="invalid-tooltip">Email invalide!</div>
                             </div>
+                            <input type="hidden" id="origin" name="origin">
                             <div class="text-center">
                                 <small class="form-text text-muted text-center" style="font-size: 10px;"><i class="bi bi-info-circle pe-2"></i>Promis, on s'en servira seulement pour vous tenir au courant de l'avancement d'Ownitty.</small>
                             </div>
@@ -494,13 +495,31 @@
 
 <script>
 
+  function get_query_params(str) {
+    const params = new Proxy(new URLSearchParams(str), {
+        get: (search_params, prop) => search_params.get(prop),
+    });
+
+    return params
+}
+
+  function setOrigin() {
+    obj = get_query_params(window.location.search);
+    //console.log(obj)
+    //console.log(obj.origin)
+    const originElt = document.getElementById("origin");
+    originElt.value = obj.origin;
+  }
+
   /* https://dev.to/kromate/connecting-your-html-forms-to-a-google-spreadsheet-p9h */
 
-  const form = document.getElementById("signupForm")
-  const submitButton = document.getElementById("submit")
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbzS2kWWGeBrORTnRyhivDImKHwIgIDuiFOb1lLJ2jeUArKc8xPMDsW8xQp1jhmr0bkL/exec'
+  const form = document.getElementById("signupForm");
+  const submitButton = document.getElementById("submit");
+  const scriptURL = 'https://script.google.com/macros/s/AKfycbzS2kWWGeBrORTnRyhivDImKHwIgIDuiFOb1lLJ2jeUArKc8xPMDsW8xQp1jhmr0bkL/exec';
 
   function sendToGDrive(email) {
+
+    setOrigin();
 
     // submitButton.disabled = true;
     submitButton.setAttribute("disabled", null);
